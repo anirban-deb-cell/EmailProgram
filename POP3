@@ -1,0 +1,136 @@
+package com.example.demo;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.annotation.PostConstruct;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.internet.MimeMessage;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+
+@SpringBootApplication
+public class EmailServiceApplication implements CommandLineRunner{
+
+	@Autowired
+	public  Configuration configuration;
+	
+	@Autowired
+    private  JavaMailSender emailSender;
+ 
+	
+	@Value("smtp.gmail.com")
+	private String host;
+	
+	@Value("587")
+	private int port;
+	
+	public static void main(String[] args) throws MessagingException, IOException, TemplateException {
+		SpringApplication.run(EmailServiceApplication.class, args);
+		
+	}
+	
+	
+	  @Override public void run(String... args) throws Exception {
+	  
+	  //sendMail();
+		  System.out.println("Reading..args...");
+		  read();
+	  }
+	  
+	/*
+	 * private void sendMail() throws MessagingException, IOException,
+	 * TemplateException { Map<String, Object> model = new HashMap<>();
+	 * model.put("name", "Anirban Deb"); model.put("email", "debanirban90"); final
+	 * String emailTo = "debanirban90@gmail.com"; final String
+	 * emailSubject="Sent Successfully"; MimeMessage message =
+	 * emailSender.createMimeMessage(); MimeMessageHelper helper = new
+	 * MimeMessageHelper(message,MimeMessageHelper.MULTIPART_MODE_MIXED); Template
+	 * template = configuration.getTemplate("email-template.ftl"); String html =
+	 * FreeMarkerTemplateUtils.processTemplateIntoString(template, model);
+	 * 
+	 * helper.setTo(emailTo); helper.setText(html,true);
+	 * helper.setSubject(emailSubject);
+	 * 
+	 * emailSender.send(message); System.out.println("Message sent...");
+	 * 
+	 * 
+	 * }
+	 */
+	  
+		String username = "debanirban89@gmail.com";
+		String password = "Ind_2020$";
+		String server ="smtp.gmail.com";
+
+		Properties properties = new Properties();
+
+
+		Folder emailFolder;
+		Store store;
+
+		@PostConstruct
+		public
+		void setup() throws MessagingException {
+			properties.put("mail.pop3.host", "pop.gmail.com");
+            
+			properties.put("mail.pop3.ssl.enable", "true"); // Use SSL
+            
+			properties.put("mail.pop3.user", "debanirban89");
+
+			properties.put("mail.pop3.socketFactory", 995);
+
+			properties.put("mail.pop3.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+
+			properties.put("mail.pop3.port", 995);
+			properties.put("mail.pop3.host", server);
+			properties.put("mail.pop3.port", port);
+			properties.put("mail.pop3.starttls.enable", "true");
+			Session emailSession = Session.getDefaultInstance(properties);
+			Store store = emailSession.getStore("pop3s");
+			store.connect("pop.gmail.com",995,username, password);
+			emailFolder = store.getFolder("INBOX");
+			emailFolder.open(Folder.READ_ONLY);
+		}
+
+		public void read() {
+			try{
+				Message[] messages = emailFolder.getMessages();  
+	               for (int i = 0; i <5; i++) {  
+	                Message message = messages[i];  
+	                System.out.println("---------------------------------");  
+	                System.out.println("Email Number " + (i + 1));  
+	                System.out.println("Subject: " + message.getSubject());  
+	                System.out.println("From: " + message.getFrom()[0]);  
+	                System.out.println("Text: " + message.getContent().toString());  
+	               }  
+	              
+	               //5) close the store and folder objects  
+	               emailFolder.close(false);  
+	               store.close();
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	 
+	 
+
+}
